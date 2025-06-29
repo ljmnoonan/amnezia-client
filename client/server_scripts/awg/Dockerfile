@@ -1,4 +1,4 @@
-FROM ghcr.io/ljmnoonan/amneziawg-go/amneziawg-go:latest
+FROM amneziavpn/amnezia-wg:latest
 
 LABEL maintainer="AmneziaVPN"
 
