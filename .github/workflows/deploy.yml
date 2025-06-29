@@ -141,12 +141,12 @@ jobs:
         path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
         retention-days: 7
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_Windows_unpacked
-        path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
-        retention-days: 7
+    # - name: 'Upload unpacked artifact'
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: AmneziaVPN_Windows_unpacked
+    #     path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
+    #     retention-days: 7
 
 
 # ------------------------------------------------------
