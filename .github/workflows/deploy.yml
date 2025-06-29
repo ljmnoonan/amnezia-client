@@ -88,13 +88,14 @@ jobs:
       QT_VERSION: 6.6.2
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
-      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
-      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+      # The following secrets are for the official Amnezia backend and are not needed for a fork build.
+      # PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      # PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      # DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      # DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      # DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      # FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      # PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
     - name: 'Get sources'
@@ -157,13 +158,14 @@ jobs:
       ANDROID_BUILD_PLATFORM: android-34
       QT_VERSION: 6.7.3
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
-      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
-      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+      # The following secrets are for the official Amnezia backend and are not needed for a fork build.
+      # PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      # PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      # DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      # DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      # DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      # FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      # PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
     - name: 'Install desktop Qt'
@@ -178,29 +180,29 @@ jobs:
         py7zrversion: '==0.22.*'
         extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install android_x86_64 Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'android'
-        arch: 'android_x86_64'
-        modules: ${{ env.QT_MODULES }}
-        dir: ${{ runner.temp }}
-        py7zrversion: '==0.22.*'
-        extra: '--base ${{ env.QT_MIRROR }}'
+    # - name: 'Install android_x86_64 Qt'
+    #   uses: jurplel/install-qt-action@v4
+    #   with:
+    #     version: ${{ env.QT_VERSION }}
+    #     host: 'linux'
+    #     target: 'android'
+    #     arch: 'android_x86_64'
+    #     modules: ${{ env.QT_MODULES }}
+    #     dir: ${{ runner.temp }}
+    #     py7zrversion: '==0.22.*'
+    #     extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install android_x86 Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'android'
-        arch: 'android_x86'
-        modules: ${{ env.QT_MODULES }}
-        dir: ${{ runner.temp }}
-        py7zrversion: '==0.22.*'
-        extra: '--base ${{ env.QT_MIRROR }}'
+    # - name: 'Install android_x86 Qt'
+    #   uses: jurplel/install-qt-action@v4
+    #   with:
+    #     version: ${{ env.QT_VERSION }}
+    #     host: 'linux'
+    #     target: 'android'
+    #     arch: 'android_x86'
+    #     modules: ${{ env.QT_MODULES }}
+    #     dir: ${{ runner.temp }}
+    #     py7zrversion: '==0.22.*'
+    #     extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_armv7 Qt'
       uses: jurplel/install-qt-action@v4
@@ -226,10 +228,11 @@ jobs:
         py7zrversion: '==0.22.*'
         extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Grant execute permission for qt-cmake'
-      shell: bash
-      run: |
-        chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
+    # - name: 'Grant execute permission for qt-cmake'
+    #   shell: bash
+    #   run: |
+    #     # This step is no longer needed as we are not installing the x86_64 Qt tools
+    #     chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -267,23 +270,23 @@ jobs:
         ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --apk "arm64-v8a;armeabi-v7a" --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
-    - name: 'Upload x86_64 apk'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN-android-x86_64
-        path: deploy/build/AmneziaVPN-x86_64-release.apk
-        compression-level: 0
-        retention-days: 7
+    # - name: 'Upload x86_64 apk'
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: AmneziaVPN-android-x86_64
+    #     path: deploy/build/AmneziaVPN-x86_64-release.apk
+    #     compression-level: 0
+    #     retention-days: 7
 
-    - name: 'Upload x86 apk'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN-android-x86
-        path: deploy/build/AmneziaVPN-x86-release.apk
-        compression-level: 0
-        retention-days: 7
+    # - name: 'Upload x86 apk'
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: AmneziaVPN-android-x86
+    #     path: deploy/build/AmneziaVPN-x86-release.apk
+    #     compression-level: 0
+    #     retention-days: 7
 
     - name: 'Upload arm64-v8a apk'
       uses: actions/upload-artifact@v4
@@ -301,11 +304,13 @@ jobs:
         compression-level: 0
         retention-days: 7
 
-    - name: 'Upload aab'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN-android
-        path: deploy/build/AmneziaVPN-release.aab
-        compression-level: 0
-        retention-days: 7
+    # - name: 'Upload aab'
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: AmneziaVPN-android
+    #     path: deploy/build/AmneziaVPN-release.aab
+    #     compression-level: 0
+    #     retention-days: 7
+
+# ------------------------------------------------------
 
