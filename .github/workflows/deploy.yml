@@ -314,3 +314,26 @@ jobs:
 
 # ------------------------------------------------------
 
+  Create-Release:
+    name: 'Create GitHub Release'
+    runs-on: ubuntu-latest
+    # This job depends on the build jobs, so it will only run if they succeed.
+    needs: [Build-Windows, Build-Android]
+    # This 'if' condition ensures that releases are only created when you push a tag,
+    # not on manual runs triggered on a branch.
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: 'Download all artifacts'
+        uses: actions/download-artifact@v4
+        with:
+          # Download all artifacts from the previous jobs into a directory named "artifacts"
+          path: artifacts/
+
+      - name: 'Create Release and Upload Assets'
+        uses: softprops/action-gh-release@v2
+        with:
+          # The GITHUB_TOKEN is automatically created by GitHub and has permissions to create a release.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # This will find all the downloaded build files and attach them to the release.
+          files: artifacts/**/*
