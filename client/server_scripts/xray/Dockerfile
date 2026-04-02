@@ -12,9 +12,19 @@ RUN chmod a+x /opt/amnezia/start.sh
 
 RUN mkdir -p /opt/amnezia/xray
 
-RUN curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip > /root/xray.zip;\
-  unzip /root/xray.zip -d /usr/bin/;\
-  chmod a+x /usr/bin/xray;
+RUN set -ex; \
+    case "$(uname -m)" in \
+        x86_64) XRAY_ARCH='64' ;; \
+        aarch64) XRAY_ARCH='arm64-v8a' ;; \
+        armv7l) XRAY_ARCH='arm32-v7a' ;; \
+        i386|i686) XRAY_ARCH='32' ;; \
+        *) echo "Unsupported architecture: $(uname -m)"; exit 1 ;; \
+    esac; \
+    curl -L "https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-${XRAY_ARCH}.zip" > /root/xray.zip; \
+    unzip /root/xray.zip -d /usr/bin/; \
+    chmod a+x /usr/bin/xray; \
+    rm /root/xray.zip
+
 
 # Tune network  
 RUN echo -e " \n\
@@ -50,4 +60,3 @@ RUN echo -e " \n\
 ENV TZ=Asia/Shanghai
 
 ENTRYPOINT [ "dumb-init", "/opt/amnezia/start.sh" ]
-
