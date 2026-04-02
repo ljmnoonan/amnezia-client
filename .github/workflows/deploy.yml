@@ -2,8 +2,8 @@ name: 'Deploy workflow'
 
 on:
   push:
-    branches:
-      - '**'
+    tags:
+      - 'v*.*.*'
 
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
@@ -73,12 +73,12 @@ jobs:
         path: deploy/AmneziaVPN_${{ env.VERSION }}_linux_x64.tar.zip
         retention-days: 7
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_Linux_unpacked
-        path: deploy/AppDir
-        retention-days: 7
+    # - name: 'Upload unpacked artifact'
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: AmneziaVPN_Linux_unpacked
+    #     path: deploy/AppDir
+    #     retention-days: 7
 
     - name: 'Upload translations artifact'
       uses: actions/upload-artifact@v4
@@ -186,104 +186,104 @@ jobs:
         path: AmneziaVPN_x${{ env.BUILD_ARCH }}.msi
         retention-days: 7
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_Windows_unpacked
-        path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
-        retention-days: 7
+    # - name: 'Upload unpacked artifact'
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: AmneziaVPN_Windows_unpacked
+    #     path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
+    #     retention-days: 7
 
 # ------------------------------------------------------
 
-  Build-iOS:
-    runs-on: macos-latest
+  # Build-iOS:
+  #   runs-on: macos-latest
 
-    env:
-      QT_VERSION: 6.10.1
-      CC: cc
-      CXX: c++
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
-      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
-      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+  #   env:
+  #     QT_VERSION: 6.10.1
+  #     CC: cc
+  #     CXX: c++
+  #     PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+  #     PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+  #     DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+  #     DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+  #     DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+  #     FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+  #     PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
-    steps:
-    - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '26.1'
+  #   steps:
+  #   - name: 'Setup xcode'
+  #     uses: maxim-lobanov/setup-xcode@v1
+  #     with:
+  #       xcode-version: '26.1'
 
-    - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
-        arch: 'clang_64'
-        dir: ${{ runner.temp }}
-        set-env: 'true'
-        extra: '--base ${{ env.QT_MIRROR }}'
+  #   - name: 'Install desktop Qt'
+  #     uses: jurplel/install-qt-action@v3
+  #     with:
+  #       version: ${{ env.QT_VERSION }}
+  #       host: 'mac'
+  #       target: 'desktop'
+  #       modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+  #       arch: 'clang_64'
+  #       dir: ${{ runner.temp }}
+  #       set-env: 'true'
+  #       extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install iOS Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'ios'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+  #   - name: 'Install iOS Qt'
+  #     uses: jurplel/install-qt-action@v3
+  #     with:
+  #       version: ${{ env.QT_VERSION }}
+  #       host: 'mac'
+  #       target: 'ios'
+  #       modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+  #       dir: ${{ runner.temp }}
+  #       setup-python: 'true'
+  #       set-env: 'true'
+  #       extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install go'
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-        cache: false
+  #   - name: 'Install go'
+  #     uses: actions/setup-go@v5
+  #     with:
+  #       go-version: '1.24'
+  #       cache: false
 
-    - name: 'Setup gomobile'
-      run: |
-          export PATH=$PATH:~/go/bin
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
+  #   - name: 'Setup gomobile'
+  #     run: |
+  #         export PATH=$PATH:~/go/bin
+  #         go install golang.org/x/mobile/cmd/gomobile@latest
+  #         gomobile init
 
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
+  #   - name: 'Get sources'
+  #     uses: actions/checkout@v4
+  #     with:
+  #       submodules: 'true'
+  #       fetch-depth: 10
 
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
+  #   # - name: 'Setup ccache'
+  #   #   uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: 'Install dependencies'
-      run: pip install jsonschema jinja2
+  #   - name: 'Install dependencies'
+  #     run: pip install jsonschema jinja2
 
-    - name: 'Build project'
-      run: |
-        git submodule update --init --recursive
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
-        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-        export PATH=$PATH:~/go/bin
-        sh deploy/build_ios.sh | \
-          sed -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-DPROD_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DPROD_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-DDEV_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DDEV_AGW_PUBLIC_KEY/d'
-      env:
-        IOS_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
-        IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
-        IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
-        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
-        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-        IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
-        IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
+  #   - name: 'Build project'
+  #     run: |
+  #       git submodule update --init --recursive
+  #       export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
+  #       export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
+  #       export PATH=$PATH:~/go/bin
+  #       sh deploy/build_ios.sh | \
+  #         sed -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/d' | \
+  #         sed -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/d' | \
+  #         sed -e '/-DPROD_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DPROD_AGW_PUBLIC_KEY/d' | \
+  #         sed -e '/-DDEV_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DDEV_AGW_PUBLIC_KEY/d'
+  #     env:
+  #       IOS_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
+  #       IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+  #       IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
+  #       APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+  #       APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+  #       APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+  #       IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
+  #       IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
 
 #    - name: 'Upload appstore .ipa and dSYMs to artifacts'
 #      uses: actions/upload-artifact@v4
@@ -296,243 +296,243 @@ jobs:
 
 # ------------------------------------------------------
 
-  Build-MacOS-old:
-    runs-on: macos-latest
+  # Build-MacOS-old:
+  #   runs-on: macos-latest
 
-    env:
-      # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
-      QT_VERSION: 6.4.3
+  #   env:
+  #     # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
+  #     QT_VERSION: 6.4.3
 
-      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+  #     MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
-      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
-      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
-      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
+  #     MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
+  #     MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
+  #     MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
 
-      MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
-      MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
-      MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
+  #     MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
+  #     MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
+  #     MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
 
-      APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
-      APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+  #     APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
+  #     APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
 
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
-      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
-      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+  #     PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+  #     PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+  #     DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+  #     DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+  #     DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+  #     FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+  #     PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
-    steps:
-    - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '15.4.0'
+  #   steps:
+  #   - name: 'Setup xcode'
+  #     uses: maxim-lobanov/setup-xcode@v1
+  #     with:
+  #       xcode-version: '15.4.0'
 
-    - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+  #   - name: 'Install Qt'
+  #     uses: jurplel/install-qt-action@v3
+  #     with:
+  #       version: ${{ env.QT_VERSION }}
+  #       host: 'mac'
+  #       target: 'desktop'
+  #       arch: 'clang_64'
+  #       modules: 'qtremoteobjects qt5compat qtshadertools'
+  #       dir: ${{ runner.temp }}
+  #       setup-python: 'true'
+  #       set-env: 'true'
+  #       extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
 
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
+  #   - name: 'Get sources'
+  #     uses: actions/checkout@v4
+  #     with:
+  #       submodules: 'true'
+  #       fetch-depth: 10
 
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
+  #   # - name: 'Setup ccache'
+  #   #   uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh -n
+  #   - name: 'Build project'
+  #     run: |
+  #       export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
+  #       bash deploy/build_macos.sh -n
 
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_MacOS_old_installer
-        path: deploy/build/pkg/AmneziaVPN.pkg
-        retention-days: 7
+  #   - name: 'Upload installer artifact'
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: AmneziaVPN_MacOS_old_installer
+  #       path: deploy/build/pkg/AmneziaVPN.pkg
+  #       retention-days: 7
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_MacOS_old_unpacked
-        path: deploy/build/client/AmneziaVPN.app
-        retention-days: 7
+  #   - name: 'Upload unpacked artifact'
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: AmneziaVPN_MacOS_old_unpacked
+  #       path: deploy/build/client/AmneziaVPN.app
+  #       retention-days: 7
 
 # ------------------------------------------------------
 
-  Build-MacOS:
-    runs-on: macos-latest
+  # Build-MacOS:
+  #   runs-on: macos-latest
 
-    env:
-      QT_VERSION: 6.10.1
+  #   env:
+  #     QT_VERSION: 6.10.1
 
-      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+  #     MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
-      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
-      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
-      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
+  #     MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
+  #     MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
+  #     MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
 
-      MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
-      MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
-      MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
+  #     MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
+  #     MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
+  #     MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
 
-      APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
-      APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+  #     APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
+  #     APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
 
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
-      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
-      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+  #     PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+  #     PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+  #     DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+  #     DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+  #     DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+  #     FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+  #     PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
-    steps:
-    - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '16.2.0'
+  #   steps:
+  #   - name: 'Setup xcode'
+  #     uses: maxim-lobanov/setup-xcode@v1
+  #     with:
+  #       xcode-version: '16.2.0'
 
-    - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        set-env: 'true'
-        aqtversion: '==3.3.0'       
-        py7zrversion: '==0.22.*'  
-        extra: '--base ${{ env.QT_MIRROR }}' 
+  #   - name: 'Install Qt'
+  #     uses: jurplel/install-qt-action@v4
+  #     with:
+  #       version: ${{ env.QT_VERSION }}
+  #       host: 'mac'
+  #       target: 'desktop'
+  #       arch: 'clang_64'
+  #       modules: 'qtremoteobjects qt5compat qtshadertools'
+  #       dir: ${{ runner.temp }}
+  #       setup-python: 'true'
+  #       set-env: 'true'
+  #       aqtversion: '==3.3.0'       
+  #       py7zrversion: '==0.22.*'  
+  #       extra: '--base ${{ env.QT_MIRROR }}' 
 
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
+  #   - name: 'Get sources'
+  #     uses: actions/checkout@v4
+  #     with:
+  #       submodules: 'true'
+  #       fetch-depth: 10
 
-    - name: 'Get version from CMakeLists.txt'
-      id: get_version
-      run: |
-        VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version: $VERSION"
+  #   - name: 'Get version from CMakeLists.txt'
+  #     id: get_version
+  #     run: |
+  #       VERSION=$(grep 'set(AMNEZIAVPN_VERSION' CMakeLists.txt | sed -E 's/.*AMNEZIAVPN_VERSION ([0-9]+.[0-9]+.[0-9]+.[0-9]+)\)/\1/')
+  #       echo "VERSION=$VERSION" >> $GITHUB_ENV
+  #       echo "Version: $VERSION"
 
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
+  #   # - name: 'Setup ccache'
+  #   #   uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh -n
+  #   - name: 'Build project'
+  #     run: |
+  #       export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
+  #       bash deploy/build_macos.sh -n
 
-    - name: 'Pack macOS installer'
-      run: |
-        cd deploy/build/pkg
-        zip -r ../../AmneziaVPN_${VERSION}_macos.zip AmneziaVPN.pkg
-        cd ../../..
+  #   - name: 'Pack macOS installer'
+  #     run: |
+  #       cd deploy/build/pkg
+  #       zip -r ../../AmneziaVPN_${VERSION}_macos.zip AmneziaVPN.pkg
+  #       cd ../../..
 
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_${{ env.VERSION }}_macos.zip
-        path: deploy/AmneziaVPN_${{ env.VERSION }}_macos.zip
-        retention-days: 7
+  #   - name: 'Upload installer artifact'
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: AmneziaVPN_${{ env.VERSION }}_macos.zip
+  #       path: deploy/AmneziaVPN_${{ env.VERSION }}_macos.zip
+  #       retention-days: 7
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/client/AmneziaVPN.app
-        retention-days: 7
+  #   - name: 'Upload unpacked artifact'
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: AmneziaVPN_MacOS_unpacked
+  #       path: deploy/build/client/AmneziaVPN.app
+  #       retention-days: 7
 
-  Build-MacOS-NE:
-    runs-on: macos-latest
+  # Build-MacOS-NE:
+  #   runs-on: macos-latest
 
-    env:
-      QT_VERSION: 6.10.1
+  #   env:
+  #     QT_VERSION: 6.10.1
 
-      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+  #     MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
-      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
-      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
-      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
+  #     MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
+  #     MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
+  #     MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
 
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
-      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
-      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+  #     PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+  #     PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+  #     DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+  #     DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+  #     DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+  #     FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+  #     PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
-    steps:
-    - name: 'Setup xcode'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '26.1'
+  #   steps:
+  #   - name: 'Setup xcode'
+  #     uses: maxim-lobanov/setup-xcode@v1
+  #     with:
+  #       xcode-version: '26.1'
 
-    - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
-        arch: 'clang_64'
-        dir: ${{ runner.temp }}
-        set-env: 'true'
-        extra: '--base ${{ env.QT_MIRROR }}'
+  #   - name: 'Install desktop Qt'
+  #     uses: jurplel/install-qt-action@v3
+  #     with:
+  #       version: ${{ env.QT_VERSION }}
+  #       host: 'mac'
+  #       target: 'desktop'
+  #       modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+  #       arch: 'clang_64'
+  #       dir: ${{ runner.temp }}
+  #       set-env: 'true'
+  #       extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install go'
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-        cache: false
+  #   - name: 'Install go'
+  #     uses: actions/setup-go@v5
+  #     with:
+  #       go-version: '1.24'
+  #       cache: false
 
-    - name: 'Setup gomobile'
-      run: |
-          export PATH=$PATH:~/go/bin
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
+  #   - name: 'Setup gomobile'
+  #     run: |
+  #         export PATH=$PATH:~/go/bin
+  #         go install golang.org/x/mobile/cmd/gomobile@latest
+  #         gomobile init
 
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
+  #   - name: 'Get sources'
+  #     uses: actions/checkout@v4
+  #     with:
+  #       submodules: 'true'
+  #       fetch-depth: 10
 
-    # - name: 'Setup ccache'
-    #   uses: hendrikmuhs/ccache-action@v1.2
+  #   # - name: 'Setup ccache'
+  #   #   uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos_ne.sh
+  #   - name: 'Build project'
+  #     run: |
+  #       export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
+  #       bash deploy/build_macos_ne.sh
 
-    - name: 'Upload unpacked artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/client/AmneziaVPN.app
-        retention-days: 7
+  #   - name: 'Upload unpacked artifact'
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: AmneziaVPN_MacOS_unpacked
+  #       path: deploy/build/client/AmneziaVPN.app
+  #       retention-days: 7
 
 # ------------------------------------------------------
 
@@ -660,7 +660,7 @@ jobs:
         ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
     - name: 'Rename Android APKs'
       run: |
@@ -703,28 +703,47 @@ jobs:
         compression-level: 0
         retention-days: 7
 
-    - name: 'Upload aab'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN-android
-        path: deploy/build/AmneziaVPN-release.aab
-        compression-level: 0
-        retention-days: 7
+    # - name: 'Upload aab'
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: AmneziaVPN-android
+    #     path: deploy/build/AmneziaVPN-release.aab
+    #     compression-level: 0
+    #     retention-days: 7
 
-  Extra:
+  # Extra:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Search a corresponding PR
+  #       uses: octokit/request-action@v2.x
+  #       id: pull_request
+  #       with:
+  #         route: GET /repos/${{ github.repository }}/pulls
+  #         head: ${{ github.repository_owner }}:${{ github.ref_name }}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: Add PR link to build summary
+  #       if: ${{ fromJSON(steps.pull_request.outputs.data)[0].number != '' }}
+  #       run: | 
+  #         echo "Pull request:" >> $GITHUB_STEP_SUMMARY
+  #         echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
+
+
+  Create-Release:
+    name: 'Create GitHub Release'
     runs-on: ubuntu-latest
-    steps:
-      - name: Search a corresponding PR
-        uses: octokit/request-action@v2.x
-        id: pull_request
-        with:
-          route: GET /repos/${{ github.repository }}/pulls
-          head: ${{ github.repository_owner }}:${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    needs: [Build-Windows, Build-Android]
+    if: startsWith(github.ref, 'refs/tags/')
 
-      - name: Add PR link to build summary
-        if: ${{ fromJSON(steps.pull_request.outputs.data)[0].number != '' }}
-        run: | 
-          echo "Pull request:" >> $GITHUB_STEP_SUMMARY
-          echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
+    steps:
+      - name: 'Download all artifacts'
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: 'Create Release and Upload Assets'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: artifacts/**/*
